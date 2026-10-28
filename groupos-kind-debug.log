@@ -1,0 +1,600 @@
+using podman due to KIND_EXPERIMENTAL_PROVIDER
+enabling experimental podman provider
+Creating cluster "groupos-local" ...
+ • Ensuring node image (kindest/node:v1.34.0) 🖼  ...
+DEBUG: podman/images.go:67] Pulling image: docker.io/kindest/node@sha256:7416a61b42b1662ca6ca89f02028ac133a309a2a30ba309614e8ec94d976dc5a ...
+ ✓ Ensuring node image (kindest/node:v1.34.0) 🖼
+ • Preparing nodes 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 
+ • Writing configuration 📜  ...
+DEBUG: config/config.go:96] Using the following kubeadm config for node groupos-local-control-plane:
+apiServer:
+  certSANs:
+  - localhost
+  - 127.0.0.1
+  extraArgs:
+    feature-gates: KubeletInUserNamespace=true
+    runtime-config: ""
+apiVersion: kubeadm.k8s.io/v1beta3
+clusterName: groupos-local
+controlPlaneEndpoint: groupos-local-control-plane:6443
+controllerManager:
+  extraArgs:
+    enable-hostpath-provisioner: "true"
+    feature-gates: KubeletInUserNamespace=true
+kind: ClusterConfiguration
+kubernetesVersion: v1.34.0
+networking:
+  podSubnet: 10.244.0.0/16
+  serviceSubnet: 10.96.0.0/16
+scheduler:
+  extraArgs:
+    feature-gates: KubeletInUserNamespace=true
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+bootstrapTokens:
+- token: abcdef.0123456789abcdef
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 10.89.1.3
+  bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///run/containerd/containerd.sock
+  kubeletExtraArgs:
+    node-ip: 10.89.1.3
+    node-labels: environment=local
+    provider-id: kind://podman/groupos-local/groupos-local-control-plane
+skipPhases:
+- preflight
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+controlPlane:
+  localAPIEndpoint:
+    advertiseAddress: 10.89.1.3
+    bindPort: 6443
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: groupos-local-control-plane:6443
+    token: abcdef.0123456789abcdef
+    unsafeSkipCAVerification: true
+kind: JoinConfiguration
+nodeRegistration:
+  criSocket: unix:///run/containerd/containerd.sock
+  kubeletExtraArgs:
+    node-ip: 10.89.1.3
+    node-labels: environment=local
+    provider-id: kind://podman/groupos-local/groupos-local-control-plane
+skipPhases:
+- preflight
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+cgroupDriver: systemd
+cgroupRoot: /kubelet
+evictionHard:
+  imagefs.available: 0%
+  nodefs.available: 0%
+  nodefs.inodesFree: 0%
+failSwapOn: false
+featureGates:
+  KubeletInUserNamespace: true
+imageGCHighThresholdPercent: 100
+kind: KubeletConfiguration
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+conntrack:
+  maxPerCore: 0
+  tcpCloseWaitTimeout: 0s
+  tcpEstablishedTimeout: 0s
+featureGates:
+  KubeletInUserNamespace: true
+iptables:
+  minSyncPeriod: 1s
+kind: KubeProxyConfiguration
+mode: iptables
+DEBUG: config/config.go:96] Using the following kubeadm config for node groupos-local-worker:
+apiServer:
+  certSANs:
+  - localhost
+  - 127.0.0.1
+  extraArgs:
+    feature-gates: KubeletInUserNamespace=true
+    runtime-config: ""
+apiVersion: kubeadm.k8s.io/v1beta3
+clusterName: groupos-local
+controlPlaneEndpoint: groupos-local-control-plane:6443
+controllerManager:
+  extraArgs:
+    enable-hostpath-provisioner: "true"
+    feature-gates: KubeletInUserNamespace=true
+kind: ClusterConfiguration
+kubernetesVersion: v1.34.0
+networking:
+  podSubnet: 10.244.0.0/16
+  serviceSubnet: 10.96.0.0/16
+scheduler:
+  extraArgs:
+    feature-gates: KubeletInUserNamespace=true
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+bootstrapTokens:
+- token: abcdef.0123456789abcdef
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 10.89.1.2
+  bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///run/containerd/containerd.sock
+  kubeletExtraArgs:
+    node-ip: 10.89.1.2
+    node-labels: environment=local
+    provider-id: kind://podman/groupos-local/groupos-local-worker
+skipPhases:
+- preflight
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: groupos-local-control-plane:6443
+    token: abcdef.0123456789abcdef
+    unsafeSkipCAVerification: true
+kind: JoinConfiguration
+nodeRegistration:
+  criSocket: unix:///run/containerd/containerd.sock
+  kubeletExtraArgs:
+    node-ip: 10.89.1.2
+    node-labels: environment=local
+    provider-id: kind://podman/groupos-local/groupos-local-worker
+skipPhases:
+- preflight
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+cgroupDriver: systemd
+cgroupRoot: /kubelet
+evictionHard:
+  imagefs.available: 0%
+  nodefs.available: 0%
+  nodefs.inodesFree: 0%
+failSwapOn: false
+featureGates:
+  KubeletInUserNamespace: true
+imageGCHighThresholdPercent: 100
+kind: KubeletConfiguration
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+conntrack:
+  maxPerCore: 0
+  tcpCloseWaitTimeout: 0s
+  tcpEstablishedTimeout: 0s
+featureGates:
+  KubeletInUserNamespace: true
+iptables:
+  minSyncPeriod: 1s
+kind: KubeProxyConfiguration
+mode: iptables
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+DEBUG: kubeadminit/init.go:96] I1028 09:57:58.102216     165 initconfiguration.go:260] loading configuration from "/kind/kubeadm.conf"
+W1028 09:57:58.104058     165 common.go:100] your configuration file uses a deprecated API spec: "kubeadm.k8s.io/v1beta3" (kind: "ClusterConfiguration"). Please use 'kubeadm config migrate --old-config old-config-file --new-config new-config-file', which will write the new, similar spec using a newer API version.
+W1028 09:57:58.111684     165 common.go:100] your configuration file uses a deprecated API spec: "kubeadm.k8s.io/v1beta3" (kind: "InitConfiguration"). Please use 'kubeadm config migrate --old-config old-config-file --new-config new-config-file', which will write the new, similar spec using a newer API version.
+W1028 09:57:58.115625     165 common.go:100] your configuration file uses a deprecated API spec: "kubeadm.k8s.io/v1beta3" (kind: "JoinConfiguration"). Please use 'kubeadm config migrate --old-config old-config-file --new-config new-config-file', which will write the new, similar spec using a newer API version.
+W1028 09:57:58.117158     165 initconfiguration.go:361] [config] WARNING: Ignored configuration document with GroupVersionKind kubeadm.k8s.io/v1beta3, Kind=JoinConfiguration
+[init] Using Kubernetes version: v1.34.0
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+I1028 09:57:58.128581     165 certs.go:111] creating a new certificate authority for ca
+[certs] Generating "ca" certificate and key
+I1028 09:57:59.739146     165 certs.go:472] validating certificate period for ca certificate
+[certs] Generating "apiserver" certificate and key
+[certs] apiserver serving cert is signed for DNS names [groupos-local-control-plane kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local localhost] and IPs [10.96.0.1 10.89.1.3 127.0.0.1]
+[certs] Generating "apiserver-kubelet-client" certificate and key
+I1028 09:58:00.293540     165 certs.go:111] creating a new certificate authority for front-proxy-ca
+[certs] Generating "front-proxy-ca" certificate and key
+I1028 09:58:01.557514     165 certs.go:472] validating certificate period for front-proxy-ca certificate
+[certs] Generating "front-proxy-client" certificate and key
+I1028 09:58:02.604157     165 certs.go:111] creating a new certificate authority for etcd-ca
+[certs] Generating "etcd/ca" certificate and key
+I1028 09:58:03.327148     165 certs.go:472] validating certificate period for etcd/ca certificate
+[certs] Generating "etcd/server" certificate and key
+[certs] etcd/server serving cert is signed for DNS names [groupos-local-control-plane localhost] and IPs [10.89.1.3 127.0.0.1 ::1]
+[certs] Generating "etcd/peer" certificate and key
+[certs] etcd/peer serving cert is signed for DNS names [groupos-local-control-plane localhost] and IPs [10.89.1.3 127.0.0.1 ::1]
+[certs] Generating "etcd/healthcheck-client" certificate and key
+[certs] Generating "apiserver-etcd-client" certificate and key
+I1028 09:58:06.833149     165 certs.go:77] creating new public/private key files for signing service account users
+[certs] Generating "sa" key and public key
+[kubeconfig] Using kubeconfig folder "/etc/kubernetes"
+I1028 09:58:08.309930     165 kubeconfig.go:111] creating kubeconfig file for admin.conf
+[kubeconfig] Writing "admin.conf" kubeconfig file
+I1028 09:58:08.946082     165 kubeconfig.go:111] creating kubeconfig file for super-admin.conf
+[kubeconfig] Writing "super-admin.conf" kubeconfig file
+I1028 09:58:09.217770     165 kubeconfig.go:111] creating kubeconfig file for kubelet.conf
+[kubeconfig] Writing "kubelet.conf" kubeconfig file
+I1028 09:58:10.728451     165 kubeconfig.go:111] creating kubeconfig file for controller-manager.conf
+[kubeconfig] Writing "controller-manager.conf" kubeconfig file
+I1028 09:58:12.477872     165 kubeconfig.go:111] creating kubeconfig file for scheduler.conf
+[kubeconfig] Writing "scheduler.conf" kubeconfig file
+[etcd] Creating static Pod manifest for local etcd in "/etc/kubernetes/manifests"
+[control-plane] Using manifest folder "/etc/kubernetes/manifests"
+[control-plane] Creating static Pod manifest for "kube-apiserver"
+I1028 09:58:12.801751     165 local.go:67] [etcd] wrote Static Pod manifest for a local etcd member to "/etc/kubernetes/manifests/etcd.yaml"
+I1028 09:58:12.801946     165 manifests.go:125] [control-plane] getting StaticPodSpecs
+I1028 09:58:12.803151     165 certs.go:472] validating certificate period for CA certificate
+I1028 09:58:12.803544     165 manifests.go:151] [control-plane] adding volume "ca-certs" for component "kube-apiserver"
+I1028 09:58:12.803739     165 manifests.go:151] [control-plane] adding volume "etc-ca-certificates" for component "kube-apiserver"
+I1028 09:58:12.803791     165 manifests.go:151] [control-plane] adding volume "k8s-certs" for component "kube-apiserver"
+I1028 09:58:12.803835     165 manifests.go:151] [control-plane] adding volume "usr-local-share-ca-certificates" for component "kube-apiserver"
+I1028 09:58:12.804190     165 manifests.go:151] [control-plane] adding volume "usr-share-ca-certificates" for component "kube-apiserver"
+[control-plane] Creating static Pod manifest for "kube-controller-manager"
+I1028 09:58:12.808558     165 manifests.go:180] [control-plane] wrote static Pod manifest for component "kube-apiserver" to "/etc/kubernetes/manifests/kube-apiserver.yaml"
+I1028 09:58:12.808718     165 manifests.go:125] [control-plane] getting StaticPodSpecs
+I1028 09:58:12.813214     165 manifests.go:151] [control-plane] adding volume "ca-certs" for component "kube-controller-manager"
+I1028 09:58:12.815301     165 manifests.go:151] [control-plane] adding volume "etc-ca-certificates" for component "kube-controller-manager"
+I1028 09:58:12.815378     165 manifests.go:151] [control-plane] adding volume "flexvolume-dir" for component "kube-controller-manager"
+I1028 09:58:12.815421     165 manifests.go:151] [control-plane] adding volume "k8s-certs" for component "kube-controller-manager"
+I1028 09:58:12.815488     165 manifests.go:151] [control-plane] adding volume "kubeconfig" for component "kube-controller-manager"
+I1028 09:58:12.819908     165 manifests.go:151] [control-plane] adding volume "usr-local-share-ca-certificates" for component "kube-controller-manager"
+I1028 09:58:12.820062     165 manifests.go:151] [control-plane] adding volume "usr-share-ca-certificates" for component "kube-controller-manager"
+[control-plane] Creating static Pod manifest for "kube-scheduler"
+I1028 09:58:12.822640     165 manifests.go:180] [control-plane] wrote static Pod manifest for component "kube-controller-manager" to "/etc/kubernetes/manifests/kube-controller-manager.yaml"
+I1028 09:58:12.822830     165 manifests.go:125] [control-plane] getting StaticPodSpecs
+I1028 09:58:12.823485     165 manifests.go:151] [control-plane] adding volume "kubeconfig" for component "kube-scheduler"
+I1028 09:58:12.825277     165 manifests.go:180] [control-plane] wrote static Pod manifest for component "kube-scheduler" to "/etc/kubernetes/manifests/kube-scheduler.yaml"
+I1028 09:58:12.825408     165 kubelet.go:69] Stopping the kubelet
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/instance-config.yaml"
+[patches] Applied patch of type "application/strategic-merge-patch+json" to target "kubeletconfiguration"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Starting the kubelet
+I1028 09:58:13.442346     165 loader.go:402] Config loaded from file:  /etc/kubernetes/admin.conf
+I1028 09:58:13.443758     165 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=false
+I1028 09:58:13.444187     165 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I1028 09:58:13.444271     165 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I1028 09:58:13.444406     165 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I1028 09:58:13.444620     165 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=false
+[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests"
+[kubelet-check] Waiting for a healthy kubelet at http://127.0.0.1:10248/healthz. This can take up to 4m0s
+[kubelet-check] The kubelet is healthy after 3.006040643s
+[control-plane-check] Waiting for healthy control plane components. This can take up to 4m0s
+[control-plane-check] Checking kube-apiserver at https://10.89.1.3:6443/livez
+[control-plane-check] Checking kube-controller-manager at https://127.0.0.1:10257/healthz
+[control-plane-check] Checking kube-scheduler at https://127.0.0.1:10259/livez
+I1028 09:58:16.473150     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=6
+I1028 09:58:16.975614     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=6
+I1028 09:58:17.481468     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=13
+I1028 09:58:17.978517     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=9
+I1028 09:58:18.476347     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=7
+I1028 09:58:18.984476     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=15
+I1028 09:58:19.476337     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=7
+I1028 09:58:19.979718     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=9
+I1028 09:58:20.479497     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=12
+I1028 09:58:20.975664     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=8
+I1028 09:58:21.475178     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=5
+I1028 09:58:21.977887     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=10
+I1028 09:58:22.476249     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=8
+I1028 09:58:22.980185     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=9
+I1028 09:58:23.483687     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=15
+I1028 09:58:23.976893     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=7
+I1028 09:58:24.481314     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=10
+[control-plane-check] kube-controller-manager is healthy after 12.442284398s
+I1028 09:58:34.970532     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="" milliseconds=10002
+I1028 09:58:35.588126     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=615
+I1028 09:58:35.669337     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=75
+[control-plane-check] kube-scheduler is healthy after 19.336061355s
+I1028 09:58:35.976408     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=9
+I1028 09:58:36.478668     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=9
+I1028 09:58:36.980724     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=10
+I1028 09:58:37.474090     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=6
+I1028 09:58:37.976171     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=8
+I1028 09:58:38.474287     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=7
+I1028 09:58:38.976717     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=10
+I1028 09:58:39.477202     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="403 Forbidden" milliseconds=9
+I1028 09:58:39.990574     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="500 Internal Server Error" milliseconds=21
+I1028 09:58:39.990896     165 request.go:1500] "Body was not decodable (unable to check for Status)" err="couldn't get version/kind; json parse error: json: cannot unmarshal array into Go value of type struct { APIVersion string \"json:\\\"apiVersion,omitempty\\\"\"; Kind string \"json:\\\"kind,omitempty\\\"\" }"
+I1028 09:58:40.474470     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="500 Internal Server Error" milliseconds=6
+I1028 09:58:40.478358     165 request.go:1500] "Body was not decodable (unable to check for Status)" err="couldn't get version/kind; json parse error: json: cannot unmarshal array into Go value of type struct { APIVersion string \"json:\\\"apiVersion,omitempty\\\"\"; Kind string \"json:\\\"kind,omitempty\\\"\" }"
+I1028 09:58:40.989658     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="500 Internal Server Error" milliseconds=19
+I1028 09:58:40.991716     165 request.go:1500] "Body was not decodable (unable to check for Status)" err="couldn't get version/kind; json parse error: json: cannot unmarshal array into Go value of type struct { APIVersion string \"json:\\\"apiVersion,omitempty\\\"\"; Kind string \"json:\\\"kind,omitempty\\\"\" }"
+I1028 09:58:41.474263     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="500 Internal Server Error" milliseconds=7
+I1028 09:58:41.474660     165 request.go:1500] "Body was not decodable (unable to check for Status)" err="couldn't get version/kind; json parse error: json: cannot unmarshal array into Go value of type struct { APIVersion string \"json:\\\"apiVersion,omitempty\\\"\"; Kind string \"json:\\\"kind,omitempty\\\"\" }"
+I1028 09:58:41.974744     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="500 Internal Server Error" milliseconds=7
+I1028 09:58:41.975555     165 request.go:1500] "Body was not decodable (unable to check for Status)" err="couldn't get version/kind; json parse error: json: cannot unmarshal array into Go value of type struct { APIVersion string \"json:\\\"apiVersion,omitempty\\\"\"; Kind string \"json:\\\"kind,omitempty\\\"\" }"
+[control-plane-check] kube-apiserver is healthy after 26.014225986s
+I1028 09:58:42.479376     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/livez?timeout=10s" status="200 OK" milliseconds=10
+I1028 09:58:42.480777     165 loader.go:402] Config loaded from file:  /etc/kubernetes/admin.conf
+I1028 09:58:42.483757     165 loader.go:402] Config loaded from file:  /etc/kubernetes/super-admin.conf
+I1028 09:58:42.485590     165 kubeconfig.go:657] ensuring that the ClusterRoleBinding for the kubeadm:cluster-admins Group exists
+I1028 09:58:42.497625     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings?timeout=10s" status="403 Forbidden" milliseconds=9
+I1028 09:58:42.498142     165 kubeconfig.go:730] creating the ClusterRoleBinding for the kubeadm:cluster-admins Group by using super-admin.conf
+I1028 09:58:42.553860     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings?timeout=10s" status="201 Created" milliseconds=54
+I1028 09:58:42.556431     165 uploadconfig.go:111] [upload-config] Uploading the kubeadm ClusterConfiguration to a ConfigMap
+[upload-config] Storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
+I1028 09:58:42.597538     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/configmaps?timeout=10s" status="201 Created" milliseconds=35
+I1028 09:58:42.621341     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-system/roles?timeout=10s" status="201 Created" milliseconds=22
+I1028 09:58:42.655162     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-system/rolebindings?timeout=10s" status="201 Created" milliseconds=30
+[kubelet] Creating a ConfigMap "kubelet-config" in namespace kube-system with the configuration for the kubelets in the cluster
+I1028 09:58:42.655600     165 uploadconfig.go:125] [upload-config] Uploading the kubelet component config to a ConfigMap
+I1028 09:58:42.680807     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/configmaps?timeout=10s" status="201 Created" milliseconds=22
+I1028 09:58:42.708186     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-system/roles?timeout=10s" status="201 Created" milliseconds=23
+I1028 09:58:42.732916     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-system/rolebindings?timeout=10s" status="201 Created" milliseconds=23
+[upload-certs] Skipping phase. Please see --upload-certs
+[mark-control-plane] Marking the node groupos-local-control-plane as control-plane by adding the labels: [node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]
+[mark-control-plane] Marking the node groupos-local-control-plane as control-plane by adding the taints [node-role.kubernetes.io/control-plane:NoSchedule]
+I1028 09:58:42.758537     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/api/v1/nodes/groupos-local-control-plane?timeout=10s" status="200 OK" milliseconds=22
+I1028 09:58:42.797445     165 round_trippers.go:632] "Response" verb="PATCH" url="https://groupos-local-control-plane:6443/api/v1/nodes/groupos-local-control-plane?timeout=10s" status="200 OK" milliseconds=34
+[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+I1028 09:58:42.799519     165 loader.go:402] Config loaded from file:  /etc/kubernetes/admin.conf
+I1028 09:58:42.819674     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/secrets/bootstrap-token-abcdef?timeout=10s" status="404 Not Found" milliseconds=15
+I1028 09:58:42.865736     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/secrets?timeout=10s" status="201 Created" milliseconds=43
+[bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to get nodes
+I1028 09:58:42.903492     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterroles?timeout=10s" status="201 Created" milliseconds=26
+I1028 09:58:42.934529     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings?timeout=10s" status="201 Created" milliseconds=26
+[bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+I1028 09:58:42.965357     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings?timeout=10s" status="201 Created" milliseconds=25
+[bootstrap-token] Configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+I1028 09:58:43.003959     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings?timeout=10s" status="201 Created" milliseconds=34
+[bootstrap-token] Configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[bootstrap-token] Creating the "cluster-info" ConfigMap in the "kube-public" namespace
+I1028 09:58:43.035487     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings?timeout=10s" status="201 Created" milliseconds=30
+I1028 09:58:43.036159     165 clusterinfo.go:58] [bootstrap-token] copying the cluster from admin.conf to the bootstrap kubeconfig
+I1028 09:58:43.036754     165 clusterinfo.go:70] [bootstrap-token] creating/updating ConfigMap in kube-public namespace
+I1028 09:58:43.064498     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-public/configmaps?timeout=10s" status="201 Created" milliseconds=24
+I1028 09:58:43.064756     165 clusterinfo.go:84] creating the RBAC rules for exposing the cluster-info ConfigMap in the kube-public namespace
+I1028 09:58:43.093689     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-public/roles?timeout=10s" status="201 Created" milliseconds=26
+[kubelet-finalize] Updating "/etc/kubernetes/kubelet.conf" to point to a rotatable kubelet client certificate and key
+I1028 09:58:43.123084     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-public/rolebindings?timeout=10s" status="201 Created" milliseconds=26
+I1028 09:58:43.123405     165 kubeletfinalize.go:90] [kubelet-finalize] Assuming that kubelet client certificate rotation is enabled: found "/var/lib/kubelet/pki/kubelet-client-current.pem"
+I1028 09:58:43.124700     165 loader.go:402] Config loaded from file:  /etc/kubernetes/kubelet.conf
+I1028 09:58:43.126504     165 kubeletfinalize.go:144] [kubelet-finalize] Restarting the kubelet to enable client certificate rotation
+I1028 09:58:43.781366     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/apis/apps/v1/namespaces/kube-system/deployments?labelSelector=k8s-app%3Dkube-dns" status="200 OK" milliseconds=32
+I1028 09:58:43.806070     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/configmaps/coredns?timeout=10s" status="404 Not Found" milliseconds=20
+I1028 09:58:43.834352     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/configmaps?timeout=10s" status="201 Created" milliseconds=25
+I1028 09:58:43.864152     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterroles?timeout=10s" status="201 Created" milliseconds=24
+I1028 09:58:43.893583     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings?timeout=10s" status="201 Created" milliseconds=27
+I1028 09:58:43.920616     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/serviceaccounts?timeout=10s" status="201 Created" milliseconds=22
+I1028 09:58:43.960229     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/apps/v1/namespaces/kube-system/deployments?timeout=10s" status="201 Created" milliseconds=33
+I1028 09:58:44.014568     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/services?timeout=10s" status="201 Created" milliseconds=50
+[addons] Applied essential addon: CoreDNS
+I1028 09:58:44.049670     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/configmaps?timeout=10s" status="201 Created" milliseconds=30
+I1028 09:58:44.091659     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/apps/v1/namespaces/kube-system/daemonsets?timeout=10s" status="201 Created" milliseconds=38
+I1028 09:58:44.130627     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/serviceaccounts?timeout=10s" status="201 Created" milliseconds=31
+I1028 09:58:44.161219     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/clusterrolebindings?timeout=10s" status="201 Created" milliseconds=27
+I1028 09:58:44.195779     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-system/roles?timeout=10s" status="201 Created" milliseconds=30
+I1028 09:58:44.227382     165 round_trippers.go:632] "Response" verb="POST" url="https://groupos-local-control-plane:6443/apis/rbac.authorization.k8s.io/v1/namespaces/kube-system/rolebindings?timeout=10s" status="201 Created" milliseconds=28
+[addons] Applied essential addon: kube-proxy
+I1028 09:58:44.229619     165 loader.go:402] Config loaded from file:  /etc/kubernetes/admin.conf
+I1028 09:58:44.231332     165 loader.go:402] Config loaded from file:  /etc/kubernetes/admin.conf
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+You can now join any number of control-plane nodes by copying certificate authorities
+and service account keys on each node and then running the following as root:
+
+  kubeadm join groupos-local-control-plane:6443 --token <value withheld> \
+	--discovery-token-ca-cert-hash sha256:8c42e708b01e69dcad7c9dd42ce2e54e8f16e121f57aefdc3b10d0a7c492206c \
+	--control-plane 
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join groupos-local-control-plane:6443 --token <value withheld> \
+	--discovery-token-ca-cert-hash sha256:8c42e708b01e69dcad7c9dd42ce2e54e8f16e121f57aefdc3b10d0a7c492206c 
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+DEBUG: installcni/cni.go:120] Using the following Kindnetd config:
+null
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kindnet
+rules:
+- apiGroups:
+  - policy
+  resourceNames:
+  - kindnet
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - pods
+  - namespaces
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kindnet
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kindnet
+subjects:
+- kind: ServiceAccount
+  name: kindnet
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kindnet
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: kindnet
+    k8s-app: kindnet
+    tier: node
+  name: kindnet
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: kindnet
+  template:
+    metadata:
+      labels:
+        app: kindnet
+        k8s-app: kindnet
+        tier: node
+    spec:
+      containers:
+      - env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_SUBNET
+          value: 10.244.0.0/16
+        - name: CONTROL_PLANE_ENDPOINT
+          value: groupos-local-control-plane:6443
+        image: docker.io/kindest/kindnetd:v20250512-df8de77b
+        name: kindnet-cni
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+        securityContext:
+          capabilities:
+            add:
+            - NET_RAW
+            - NET_ADMIN
+          privileged: false
+        volumeMounts:
+        - mountPath: /etc/cni/net.d
+          name: cni-cfg
+        - mountPath: /run/xtables.lock
+          name: xtables-lock
+          readOnly: false
+        - mountPath: /lib/modules
+          name: lib-modules
+          readOnly: true
+        - mountPath: /var/run/nri
+          name: nri-plugin
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: system-node-critical
+      serviceAccountName: kindnet
+      tolerations:
+      - operator: Exists
+      volumes:
+      - hostPath:
+          path: /etc/cni/net.d
+        name: cni-cfg
+      - hostPath:
+          path: /run/xtables.lock
+          type: FileOrCreate
+        name: xtables-lock
+      - hostPath:
+          path: /lib/modules
+        name: lib-modules
+      - hostPath:
+          path: /var/run/nri
+        name: nri-plugin
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+DEBUG: kubeadmjoin/join.go:147] I1028 09:58:55.628220     165 join.go:421] [preflight] found NodeName empty; using OS hostname as NodeName
+I1028 09:58:55.628555     165 joinconfiguration.go:82] loading configuration from "/kind/kubeadm.conf"
+W1028 09:58:55.632067     165 joinconfiguration.go:112] [config] WARNING: Ignored configuration document with GroupVersionKind kubelet.config.k8s.io/v1beta1, Kind=KubeletConfiguration
+W1028 09:58:55.632576     165 joinconfiguration.go:112] [config] WARNING: Ignored configuration document with GroupVersionKind kubeproxy.config.k8s.io/v1alpha1, Kind=KubeProxyConfiguration
+W1028 09:58:55.632633     165 joinconfiguration.go:112] [config] WARNING: Ignored configuration document with GroupVersionKind kubeadm.k8s.io/v1beta3, Kind=ClusterConfiguration
+W1028 09:58:55.632719     165 joinconfiguration.go:112] [config] WARNING: Ignored configuration document with GroupVersionKind kubeadm.k8s.io/v1beta3, Kind=InitConfiguration
+W1028 09:58:55.633754     165 common.go:100] your configuration file uses a deprecated API spec: "kubeadm.k8s.io/v1beta3" (kind: "JoinConfiguration"). Please use 'kubeadm config migrate --old-config old-config-file --new-config new-config-file', which will write the new, similar spec using a newer API version.
+I1028 09:58:55.636427     165 controlplaneprepare.go:225] [download-certs] Skipping certs download
+I1028 09:58:55.637012     165 join.go:551] [preflight] Discovering cluster-info
+I1028 09:58:55.637474     165 token.go:71] [discovery] Created cluster-info discovery client, requesting info from "groupos-local-control-plane:6443"
+I1028 09:58:55.638261     165 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I1028 09:58:55.638610     165 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=false
+I1028 09:58:55.639201     165 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=false
+I1028 09:58:55.639308     165 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I1028 09:58:55.639360     165 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I1028 09:58:55.640642     165 token.go:229] [discovery] Waiting for the cluster-info ConfigMap to receive a JWS signature for token ID "abcdef"
+I1028 09:58:55.694532     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-public/configmaps/cluster-info?timeout=10s" status="200 OK" milliseconds=52
+I1028 09:58:55.702248     165 token.go:113] [discovery] Cluster info signature and contents are valid and no TLS pinning was specified, will use API Server "groupos-local-control-plane:6443"
+I1028 09:58:55.702601     165 discovery.go:52] [discovery] Using provided TLSBootstrapToken as authentication credentials for the join process
+[preflight] Reading configuration from the "kubeadm-config" ConfigMap in namespace "kube-system"...
+I1028 09:58:55.703212     165 join.go:565] [preflight] Fetching init configuration
+I1028 09:58:55.703290     165 join.go:654] [preflight] Retrieving KubeConfig objects
+[preflight] Use 'kubeadm init phase upload-config kubeadm --config your-config-file' to re-upload it.
+I1028 09:58:55.745107     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/configmaps/kubeadm-config?timeout=10s" status="200 OK" milliseconds=38
+I1028 09:58:55.750409     165 kubeproxy.go:55] attempting to download the KubeProxyConfiguration from ConfigMap "kube-proxy"
+I1028 09:58:55.779520     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/configmaps/kube-proxy?timeout=10s" status="200 OK" milliseconds=27
+I1028 09:58:55.785593     165 kubelet.go:73] attempting to download the KubeletConfiguration from ConfigMap "kubelet-config"
+I1028 09:58:55.809683     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/api/v1/namespaces/kube-system/configmaps/kubelet-config?timeout=10s" status="200 OK" milliseconds=21
+I1028 09:58:55.815583     165 initconfiguration.go:114] skip CRI socket detection, fill with the default CRI socket unix:///var/run/containerd/containerd.sock
+I1028 09:58:55.818165     165 interface.go:432] Looking for default routes with IPv4 addresses
+I1028 09:58:55.818230     165 interface.go:437] Default route transits interface "eth0"
+I1028 09:58:55.818497     165 interface.go:209] Interface eth0 is up
+I1028 09:58:55.818718     165 interface.go:257] Interface "eth0" has 3 addresses :[10.89.1.2/24 fc00:f853:ccd:e793::2/64 fe80::e82e:a2ff:fe47:188c/64].
+I1028 09:58:55.818797     165 interface.go:224] Checking addr  10.89.1.2/24.
+I1028 09:58:55.819235     165 interface.go:231] IP found 10.89.1.2
+I1028 09:58:55.819321     165 interface.go:263] Found valid IPv4 address 10.89.1.2 for interface "eth0".
+I1028 09:58:55.819389     165 interface.go:443] Found active IP 10.89.1.2 
+I1028 09:58:55.820456     165 kubelet.go:166] [kubelet-start] writing bootstrap kubelet config file at /etc/kubernetes/bootstrap-kubelet.conf
+I1028 09:58:55.825758     165 kubelet.go:181] [kubelet-start] writing CA certificate at /etc/kubernetes/pki/ca.crt
+I1028 09:58:55.826327     165 kubelet.go:197] [kubelet-start] Checking for an existing Node in the cluster with name "groupos-local-worker" and status "Ready"
+I1028 09:58:55.848446     165 round_trippers.go:632] "Response" verb="GET" url="https://groupos-local-control-plane:6443/api/v1/nodes/groupos-local-worker?timeout=10s" status="404 Not Found" milliseconds=21
+I1028 09:58:55.850723     165 kubelet.go:212] [kubelet-start] Stopping the kubelet
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/instance-config.yaml"
+[patches] Applied patch of type "application/strategic-merge-patch+json" to target "kubeletconfiguration"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-check] Waiting for a healthy kubelet at http://127.0.0.1:10248/healthz. This can take up to 4m0s
+[kubelet-check] The kubelet is healthy after 1.51074915s
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap
+I1028 09:58:58.020723     165 loader.go:402] Config loaded from file:  /etc/kubernetes/kubelet.conf
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+
+I1028 09:58:58.022668     165 loader.go:402] Config loaded from file:  /etc/kubernetes/kubelet.conf
+ ✓ Joining worker nodes 🚜
+ • Waiting ≤ 5m0s for control-plane = Ready ⏳  ...
+ ✓ Waiting ≤ 5m0s for control-plane = Ready ⏳
+ • Ready after 15s 💚
+Set kubectl context to "kind-groupos-local"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-groupos-local
+
+Thanks for using kind! 😊

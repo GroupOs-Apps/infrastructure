@@ -1,0 +1,14 @@
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+
+name: groupos-local
+
+nodes:
+  - role: control-plane
+    labels:
+      environment: local
+
+  - role: worker
+    labels:
+      environment: local
