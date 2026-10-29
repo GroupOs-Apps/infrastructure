@@ -1,0 +1,9 @@
+# Local operational artifacts
+/backups/
+/*.log
+
+# Local credentials
+*.key
+*.pem
+.env
+.env.*
