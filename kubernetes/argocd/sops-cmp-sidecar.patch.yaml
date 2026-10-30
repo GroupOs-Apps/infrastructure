@@ -1,0 +1,62 @@
+- op: add
+  path: /spec/template/spec/containers/-
+  value:
+    name: groupos-sops-cmp
+    image: localhost/groupos-sops-cmp:v1
+    imagePullPolicy: Never
+    command:
+      - /var/run/argocd/argocd-cmp-server
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 999
+      runAsGroup: 999
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+    env:
+      - name: HOME
+        value: /home/argocd
+      - name: SOPS_AGE_KEY_FILE
+        value: /home/argocd/.config/sops/age/keys.txt
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+    volumeMounts:
+      - name: var-files
+        mountPath: /var/run/argocd
+      - name: plugins
+        mountPath: /home/argocd/cmp-server/plugins
+      - name: groupos-sops-cmp-config
+        mountPath: /home/argocd/cmp-server/config/plugin.yaml
+        subPath: plugin.yaml
+        readOnly: true
+      - name: groupos-sops-age-key
+        mountPath: /home/argocd/.config/sops/age
+        readOnly: true
+      - name: groupos-cmp-tmp
+        mountPath: /tmp
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: groupos-sops-cmp-config
+    configMap:
+      name: groupos-sops-cmp-config
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: groupos-sops-age-key
+    secret:
+      secretName: groupos-sops-age-key
+      defaultMode: 0444
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: groupos-cmp-tmp
+    emptyDir: {}

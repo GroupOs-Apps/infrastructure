@@ -1,0 +1,13 @@
+FROM alpine:3.22
+
+RUN apk add --no-cache \
+    sops \
+    ca-certificates
+
+# Buat user non-root dengan UID 999.
+# Gunakan grup yang sudah tersedia, tanpa membuat GID 999 baru.
+RUN adduser -D -u 999 -G nogroup argocd
+
+USER 999:999
+
+WORKDIR /home/argocd
