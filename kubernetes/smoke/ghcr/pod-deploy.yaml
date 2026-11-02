@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: groupos-ghcr-smoke
+  name: groupos-ghcr-smoke
+  namespace: groupos-web
+spec:
+  containers:
+  - image: ghcr.io/groupos-apps/groupos-infra-smoke:sha-fd3472812f94e775ed59e8296fbbe5723ee1fa68
+    imagePullPolicy: Always
+    name: smoke
+    ports:
+    - containerPort: 8080
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 16Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+  imagePullSecrets:
+  - name: groupos-ghcr
+  restartPolicy: Never
+  securityContext:
+    runAsGroup: 10001
+    runAsNonRoot: true
+    runAsUser: 10001
+    seccompProfile:
+      type: RuntimeDefault
+status: {}

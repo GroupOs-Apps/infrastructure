@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: groupos-storage-restore
+  namespace: groupos-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: groupos-storage-restore
+  namespace: groupos-system
+  labels:
+    app: groupos-storage-restore
+spec:
+  restartPolicy: Never
+  containers:
+    - name: restore
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - sleep 360000
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: groupos-storage-restore
