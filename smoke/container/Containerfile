@@ -1,12 +1,14 @@
 FROM alpine:3.22
 
-RUN mkdir -p /www \
+RUN apk add --no-cache busybox-extras \
+    && mkdir -p /www \
     && printf '%s\n' \
        '<html><body><h1>GroupOS Infrastructure Ready</h1></body></html>' \
-       > /www/index.html
+       > /www/index.html \
+    && chmod -R 755 /www
 
 USER 10001:10001
 
 EXPOSE 8080
 
-CMD ["busybox", "httpd", "-f", "-p", "8080", "-h", "/www"]
+CMD ["/bin/busybox-extras", "httpd", "-f", "-p", "8080", "-h", "/www"]y
