@@ -2,18 +2,94 @@ name: GroupOS Infrastructure Smoke Image
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "smoke/container/**"
+      - "scripts/ci/**"
+      - ".github/workflows/infra-smoke-image.yaml"
   push:
     branches:
       - main
     paths:
       - "smoke/container/**"
+      - "scripts/ci/**"
       - ".github/workflows/infra-smoke-image.yaml"
 
 permissions:
   contents: read
 
 jobs:
-  build-and-push:
+  validate-image:
+    name: Build and HTTP Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Build image for testing
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            -t groupos-infra-smoke:ci-test \
+            -f smoke/container/Containerfile \
+            smoke/container
+
+      - name: HTTP smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CONTAINER="groupos-smoke-ci"
+
+          cleanup() {
+            docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+          }
+
+          trap cleanup EXIT
+
+          docker run -d \
+            --name "$CONTAINER" \
+            -p 127.0.0.1::8080 \
+            groupos-infra-smoke:ci-test
+
+          PORT=$(docker port "$CONTAINER" 8080/tcp \
+            | head -n 1 \
+            | awk -F: '{print $NF}')
+
+          echo "Testing http://127.0.0.1:${PORT}/"
+
+          SUCCESS=0
+
+          for i in $(seq 1 30); do
+            if curl --fail --silent --show-error \
+              "http://127.0.0.1:${PORT}/" \
+              | grep -q "GroupOS Infrastructure Ready"; then
+              SUCCESS=1
+              break
+            fi
+
+            if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER")" != "true" ]; then
+              break
+            fi
+
+            sleep 1
+          done
+
+          if [ "$SUCCESS" -ne 1 ]; then
+            echo "FAIL: HTTP smoke test"
+            docker logs "$CONTAINER"
+            exit 1
+          fi
+
+          echo "PASS: HTTP smoke test"
+
+  publish-image:
+    name: Publish image to GHCR
+    needs: validate-image
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     permissions:
@@ -34,7 +110,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push smoke image
+      - name: Build and push image
         uses: docker/build-push-action@v7
         with:
           context: ./smoke/container
