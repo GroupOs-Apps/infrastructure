@@ -86,6 +86,19 @@ jobs:
 
           echo "PASS: HTTP smoke test"
 
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: groupos-infra-smoke:ci-test
+          format: table
+          severity: HIGH,CRITICAL
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+          scanners: vuln
+
   publish-image:
     name: Publish image to GHCR
     needs: validate-image
